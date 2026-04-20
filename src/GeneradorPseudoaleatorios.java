@@ -13,6 +13,8 @@ public class GeneradorPseudoaleatorios extends JFrame {
     private static final Font F_BOLD = new Font("Segoe UI", Font.BOLD, 13);
     private static final Font F_PLAIN = new Font("Segoe UI", Font.PLAIN, 13);
 
+    
+
     // --- HOME ---
     private JPanel cards;
     private CardLayout cardLayout;
@@ -32,7 +34,7 @@ public class GeneradorPseudoaleatorios extends JFrame {
     public GeneradorPseudoaleatorios() {
         super("Sistemas de Simulación");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(850, 850);
+        setSize(900, 850);
         setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
@@ -78,15 +80,31 @@ public class GeneradorPseudoaleatorios extends JFrame {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(AZUL);
-        header.setBorder(new EmptyBorder(10, 10, 10, 10));
-        
-        JButton btnVolver = new JButton("⬅ Volver al Menú");
-        btnVolver.addActionListener(e -> cardLayout.show(cards, "MENU"));
-        header.add(btnVolver, BorderLayout.WEST);
+        header.setBorder(new EmptyBorder(5, 10, 5, 10)); // Un poco más estrecho
 
+        
+        JPanel panelIzquierdo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panelIzquierdo.setOpaque(false);
+        
+        JButton btnVolver = new JButton("⬅ Volver");
+        btnVolver.addActionListener(e -> cardLayout.show(cards, "MENU"));
+        
+        JLabel logoIzquierdo = new JLabel(escalarImagen("ISC.png"));
+        
+        panelIzquierdo.add(btnVolver);
+        panelIzquierdo.add(logoIzquierdo);
+        header.add(panelIzquierdo, BorderLayout.WEST); 
+
+    
         JLabel lblTitle = new JLabel("Generador de Números", SwingConstants.CENTER);
         lblTitle.setFont(F_BOLD); lblTitle.setForeground(Color.WHITE);
         header.add(lblTitle, BorderLayout.CENTER);
+
+       
+        JLabel logoDerecho = new JLabel(escalarImagen("Logo-ITSH.png"));
+        header.add(logoDerecho, BorderLayout.EAST);
+
+    
 
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
@@ -116,7 +134,7 @@ public class GeneradorPseudoaleatorios extends JFrame {
         lblError.setForeground(Color.RED);
         center.add(lblError);
 
-        JButton btnExec = new JButton(" ▶️ GENERAR NÚMEROS ");
+        JButton btnExec = new JButton(" -> GENERAR NÚMEROS ");
         btnExec.setBackground(AZUL); btnExec.setForeground(Color.WHITE);
         btnExec.addActionListener(e -> generar());
         center.add(btnExec);
@@ -139,16 +157,32 @@ public class GeneradorPseudoaleatorios extends JFrame {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(60, 60, 60));
-        header.setBorder(new EmptyBorder(10, 10, 10, 10));
-        JButton btnVolver = new JButton("⬅ Volver al Menú");
-        btnVolver.addActionListener(e -> cardLayout.show(cards, "MENU"));
-        header.add(btnVolver, BorderLayout.WEST);
+        header.setBorder(new EmptyBorder(5, 10, 5, 10));
+
         
-        JLabel lblTitle = new JLabel("Pruebas de Validación Estadísticas", SwingConstants.CENTER);
+        JPanel panelIzquierdoComp = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panelIzquierdoComp.setOpaque(false);
+
+        JButton btnVolver = new JButton("⬅ Volver");
+        btnVolver.addActionListener(e -> cardLayout.show(cards, "MENU"));
+        
+        JLabel logoIzquierdoComp = new JLabel(escalarImagen("ISC.png"));
+        
+        panelIzquierdoComp.add(btnVolver);
+        panelIzquierdoComp.add(logoIzquierdoComp);
+        header.add(panelIzquierdoComp, BorderLayout.WEST);
+
+       
+        JLabel lblTitle = new JLabel("Pruebas Estadísticas", SwingConstants.CENTER);
         lblTitle.setFont(F_BOLD); lblTitle.setForeground(Color.WHITE);
         header.add(lblTitle, BorderLayout.CENTER);
-        root.add(header, BorderLayout.NORTH);
 
+        
+        JLabel logoDerechoComp = new JLabel(escalarImagen("Logo-ITSH.png"));
+        header.add(logoDerechoComp, BorderLayout.EAST);
+
+        root.add(header, BorderLayout.NORTH); 
+        
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -589,6 +623,24 @@ public class GeneradorPseudoaleatorios extends JFrame {
         b.setPreferredSize(new Dimension(200, 80));
         b.setBackground(AZUL2); b.setForeground(AZUL);
         return b;
+    }
+
+
+    private ImageIcon escalarImagen(String nombreArchivo) {
+        try {
+            
+            java.net.URL imgURL = getClass().getResource("/logos/" + nombreArchivo);
+            if (imgURL != null) {
+                ImageIcon icono = new ImageIcon(imgURL);
+                Image img = icono.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                return new ImageIcon(img);
+            } else {
+                System.err.println("No se encontró el archivo: " + nombreArchivo);
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static void main(String[] args) {
