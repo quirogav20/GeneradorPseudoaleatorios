@@ -89,7 +89,7 @@ public class GeneradorPseudoaleatorios extends JFrame {
         JButton btnVolver = new JButton("⬅ Volver");
         btnVolver.addActionListener(e -> cardLayout.show(cards, "MENU"));
         
-        JLabel logoIzquierdo = new JLabel(escalarImagen("ISC.png"));
+        JLabel logoIzquierdo = new JLabel(escalarImagen("src/logos/ISC.png"));
         
         panelIzquierdo.add(btnVolver);
         panelIzquierdo.add(logoIzquierdo);
@@ -100,8 +100,8 @@ public class GeneradorPseudoaleatorios extends JFrame {
         lblTitle.setFont(F_BOLD); lblTitle.setForeground(Color.WHITE);
         header.add(lblTitle, BorderLayout.CENTER);
 
-       
-        JLabel logoDerecho = new JLabel(escalarImagen("Logo-ITSH.png"));
+
+        JLabel logoDerecho = new JLabel(escalarImagen("src/logos/Logo-ITSH.png"));
         header.add(logoDerecho, BorderLayout.EAST);
 
     
@@ -206,7 +206,8 @@ public class GeneradorPseudoaleatorios extends JFrame {
             "1. Prueba de Medias",
             "2. Prueba de Varianza",
             "3. Chi-Cuadrada",
-            "4. Kolmogorov-Smirnov"
+            "4. Kolmogorov-Smirnov",
+            "5. Corridas Arriba y Abajo"
         };
         comboPruebas = new JComboBox<>(pruebas);
         center.add(comboPruebas);
@@ -251,6 +252,7 @@ public class GeneradorPseudoaleatorios extends JFrame {
                 case 1 -> pruebaDeVarianza(ri, alfa);
                 case 2 -> pruebaChiCuadrada(ri, alfa);
                 case 3 -> pruebaKolmogorov(ri, alfa);
+                case 4 -> pruebaCorridasArribaAbajo(ri, alfa);
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Asegúrese de ingresar números válidos en Alfa y en los datos.");
@@ -259,7 +261,68 @@ public class GeneradorPseudoaleatorios extends JFrame {
         }
     }
 
-    // --- MÉTODOS ESTADÍSTICOS AUXILIARES ---
+    private void pruebaCorridasArribaAbajo(double[] ri, double alfa) {
+        int n = ri.length;
+        if (n < 2) {
+            areaResultados.setText("Error: Se requieren al menos 2 datos para esta prueba.");
+            return;
+        }
+
+        // 1. Generar secuencia S de unos y ceros
+        int[] s = new int[n - 1];
+        StringBuilder seqStr = new StringBuilder("{");
+        for (int i = 1; i < n; i++) {
+            s[i - 1] = (ri[i] > ri[i - 1]) ? 1 : 0;
+            seqStr.append(s[i - 1]).append(i == n - 1 ? "" : ",");
+        }
+        seqStr.append("}");
+
+        // 2. Determinar número de corridas observadas Co
+        int Co = 1;
+        for (int i = 1; i < s.length; i++) {
+            if (s[i] != s[i - 1]) {
+                Co++;
+            }
+        }
+
+        // 3. Cálculos estadísticos
+        double mu = (2.0 * n - 1) / 3.0;
+        double varianza = (16.0 * n - 29) / 90.0;
+        double desviacion = Math.sqrt(varianza);
+        double Z0 = Math.abs((Co - mu) / desviacion);
+        
+        double ZAlpha2 = obtenerZDosColas(alfa);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- PRUEBA DE CORRIDAS ARRIBA Y ABAJO ---\n");
+        sb.append("Nivel de significancia (α): ").append(alfa).append("\n");
+        sb.append("Cantidad de datos (n): ").append(n).append("\n");
+        sb.append("Secuencia S (n-1): ").append(seqStr).append("\n\n");
+        
+        sb.append("ESTADÍSTICOS:\n");
+        sb.append("Corridas observadas (Co): ").append(Co).append("\n");
+        sb.append("Valor esperado (μCo): ").append(String.format("%.4f", mu)).append("\n");
+        sb.append("Varianza (σ²Co): ").append(String.format("%.4f", varianza)).append("\n");
+        sb.append("Z calculado (Z₀): ").append(String.format("%.4f", Z0)).append("\n");
+        sb.append("Z crítico (Zα/2): ").append(ZAlpha2).append("\n\n");
+
+        sb.append("EVALUACIÓN:\n");
+        sb.append("¿ ").append(String.format("%.4f", Z0)).append(" < ").append(ZAlpha2).append(" ?\n\n");
+
+        if (Z0 < ZAlpha2) {
+            sb.append(">>> RESULTADO: SE ACEPTA H0 <<<\n");
+            sb.append("No se puede rechazar la independencia de los números.\n");
+            sb.append("Conclusión: Los números son independientes.");
+        } else {
+            sb.append(">>> RESULTADO: SE RECHAZA H0 <<<\n");
+            sb.append("El estadístico Z₀ es mayor al valor crítico.\n");
+            sb.append("Conclusión: Los números no son independientes.");
+        }
+
+        areaResultados.setText(sb.toString());
+    }
+
+    
     
     // Obtiene el valor Z de la normal estándar para dos colas (aproximaciones comunes)
     private double obtenerZDosColas(double alfa) {
