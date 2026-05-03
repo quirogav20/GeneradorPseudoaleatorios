@@ -207,7 +207,8 @@ public class GeneradorPseudoaleatorios extends JFrame {
             "2. Prueba de Varianza",
             "3. Chi-Cuadrada",
             "4. Kolmogorov-Smirnov",
-            "5. Corridas Arriba y Abajo"
+            "5. Corridas Arriba y Abajo",
+            "6. Corridas Arriba y Abajo de la Media"
         };
         comboPruebas = new JComboBox<>(pruebas);
         center.add(comboPruebas);
@@ -253,6 +254,7 @@ public class GeneradorPseudoaleatorios extends JFrame {
                 case 2 -> pruebaChiCuadrada(ri, alfa);
                 case 3 -> pruebaKolmogorov(ri, alfa);
                 case 4 -> pruebaCorridasArribaAbajo(ri, alfa);
+                case 5 -> pruebaCorridasMedia(ri, alfa);
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Asegúrese de ingresar números válidos en Alfa y en los datos.");
@@ -551,6 +553,84 @@ public class GeneradorPseudoaleatorios extends JFrame {
         }
         areaResultados.setText(sb.toString());
     }
+
+private void pruebaCorridasMedia(double[] ri, double alfa) {
+    int n = ri.length;
+
+    if (n < 2) {
+        areaResultados.setText("Error: Se requieren al menos 2 datos.");
+        return;
+    }
+
+    // 1. Generar secuencia de 1 y 0 respecto a 0.5
+    int[] s = new int[n];
+    int n1 = 0, n0 = 0;
+
+    StringBuilder secuencia = new StringBuilder("{");
+
+    for (int i = 0; i < n; i++) {
+        if (ri[i] >= 0.5) {
+            s[i] = 1;
+            n1++;
+        } else {
+            s[i] = 0;
+            n0++;
+        }
+        secuencia.append(s[i]).append(i == n - 1 ? "" : ",");
+    }
+    secuencia.append("}");
+
+    // 2. Contar corridas
+    int Co = 1;
+    for (int i = 1; i < n; i++) {
+        if (s[i] != s[i - 1]) {
+            Co++;
+        }
+    }
+
+    // 3. Calcular media y varianza
+    double mu = (2.0 * n0 * n1) / n + 0.5;
+    double var = (2.0 * n0 * n1 * (2.0 * n0 * n1 - n)) / (Math.pow(n, 2) * (n - 1));
+    double sigma = Math.sqrt(var);
+
+    double Z0 = Math.abs((Co - mu) / sigma);
+    double Zcritico = obtenerZDosColas(alfa);
+
+    // 4. Mostrar resultados
+    StringBuilder sb = new StringBuilder();
+    sb.append("--- PRUEBA DE CORRIDAS ARRIBA Y ABAJO DE LA MEDIA ---\n\n");
+    sb.append("Nivel de significancia: ").append(alfa).append("\n");
+    sb.append("n = ").append(n).append("\n");
+    sb.append("n0 (ceros): ").append(n0).append("\n");
+    sb.append("n1 (unos): ").append(n1).append("\n\n");
+
+    sb.append("Secuencia S: ").append(secuencia).append("\n\n");
+
+    sb.append("Corridas observadas (Co): ").append(Co).append("\n");
+    sb.append("Media (μ): ").append(String.format("%.4f", mu)).append("\n");
+    sb.append("Varianza (σ²): ").append(String.format("%.4f", var)).append("\n");
+    sb.append("Z calculado: ").append(String.format("%.4f", Z0)).append("\n");
+    sb.append("Z crítico: ").append(Zcritico).append("\n\n");
+
+    sb.append("EVALUACIÓN:\n");
+    sb.append("¿ ").append(String.format("%.4f", Z0)).append(" < ").append(Zcritico).append(" ?\n\n");
+
+    if (Z0 < Zcritico) {
+        sb.append(">>> RESULTADO: SE ACEPTA H0 <<<\n");
+        sb.append("Los números son independientes.");
+    } else {
+        sb.append(">>> RESULTADO: SE RECHAZA H0 <<<\n");
+        sb.append("Los números NO son independientes.");
+    }
+
+    areaResultados.setText(sb.toString());
+}
+
+
+
+
+
+
 
     // --- LÓGICA DE GENERADORES ---
     private void generar() {
