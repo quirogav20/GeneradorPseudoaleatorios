@@ -710,4 +710,4 @@ public class GeneradorPseudoaleatorios extends JFrame {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) {}
         SwingUtilities.invokeLater(GeneradorPseudoaleatorios::new);
     }
-}
+}  
